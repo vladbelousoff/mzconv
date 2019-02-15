@@ -1,4 +1,5 @@
 import argparse
+import struct
 import sys
 
 
@@ -12,6 +13,15 @@ def process_line(data, command):
         data.setdefault(command[0], []).append(command[1:])
 
 
+def process_faces(data):
+    for key, values in data.iteritems():
+        if key not in ['v', 'vt', 'vn']:
+            continue
+        with open(key, 'wb') as dot_file:
+            for vector in values:
+                dot_file.write(struct.pack('%sf' % len(vector), *map(float, vector)))
+
+
 def process_obj(filename):
     data = {}
     try:
@@ -20,8 +30,7 @@ def process_obj(filename):
             process_line(data, filter(lambda _: _, line.strip().split(' ')))
     except Exception as error:
         exit(error)
-    print data.keys()
-
+    process_faces(data)
 
 def generate_mz(filename, obj):
     pass
